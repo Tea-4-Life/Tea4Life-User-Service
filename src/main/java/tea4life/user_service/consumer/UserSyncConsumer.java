@@ -27,28 +27,51 @@ public class UserSyncConsumer {
     @KafkaListener(topics = "user-registration", groupId = "tea4life-user-group")
     public void listenUserRegistration(String message) {
         try {
-            log.info("Received user registration event from Kafka. Payload: {}", message);
-
             JsonNode payload = objectMapper.readTree(message);
-            String keycloakId = payload.get("userId").asText();
-            String email = payload.get("email").asText();
+            String action = payload.path("action").asText("CREATE");
+            String source = payload.path("source").asText("UNKNOWN");
+            String userId = payload.path("userId").asText();
 
-            if (userRepository.existsByKeycloakId(keycloakId)) {
-                log.warn("User with Keycloak ID: {} already exists. Skipping synchronization.", keycloakId);
-                return;
+            log.info(
+                    ">>>> [KAFKA-IN] [{}] Source: {} | UserID: {} | Email: {}",
+                    String.format("%-6s", action), String.format("%-5s", source),
+                    userId, payload.path("email").asText()
+            );
+
+            switch (action) {
+                case "CREATE" -> handleCreateUser(payload, userId);
+
+                case "DELETE" -> {
+
+                }
+
+                case "UPDATE" -> {
+
+                }
+
+                default -> {
+                    log.warn("Unrecognized action: {}", action);
+                }
             }
 
-
-            User newUser = new User();
-            newUser.setKeycloakId(keycloakId);
-            newUser.setEmail(email);
-
-            userRepository.save(newUser);
-            log.info("Successfully synchronized user [{}] to the local database.", email);
-
         } catch (Exception e) {
-            log.error("Failed to synchronize user from Kafka. Error: {}", e.getMessage(), e);
+            log.error("Failed to process Kafka message: {}", e.getMessage());
         }
+    }
+
+    private void handleCreateUser(JsonNode payload, String keycloakId) {
+        if (userRepository.existsByKeycloakId(keycloakId)) {
+            log.warn("User {} already exists. Skipping.", keycloakId);
+            return;
+        }
+
+        User newUser = new User();
+        newUser.setKeycloakId(keycloakId);
+        newUser.setEmail(payload.path("email").asText("no-email"));
+
+        userRepository.save(newUser);
+
+        log.info("Successfully persisted new user to MariaDB.");
     }
 
 
