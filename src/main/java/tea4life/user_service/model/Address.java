@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import tea4life.user_service.generator.SnowflakeGenerated;
+import tea4life.user_service.model.base.BaseEntity;
 import tea4life.user_service.model.constant.AddressType;
 
 /**
@@ -17,7 +18,7 @@ import tea4life.user_service.model.constant.AddressType;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Address {
+public class Address extends BaseEntity {
 
     @SnowflakeGenerated
     @Id

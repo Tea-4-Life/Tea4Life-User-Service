@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import tea4life.user_service.generator.SnowflakeGenerated;
+import tea4life.user_service.model.base.BaseEntity;
 
 import java.util.Set;
 
@@ -18,7 +19,7 @@ import java.util.Set;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Role {
+public class Role extends BaseEntity {
 
     @Id
     @SnowflakeGenerated

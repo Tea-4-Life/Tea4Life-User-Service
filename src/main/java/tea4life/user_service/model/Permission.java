@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import tea4life.user_service.generator.SnowflakeGenerated;
+import tea4life.user_service.model.base.BaseEntity;
 
 /**
  * Admin 2/3/2026
@@ -19,7 +20,7 @@ import tea4life.user_service.generator.SnowflakeGenerated;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Permission {
+public class Permission extends BaseEntity {
 
     @Id
     @SnowflakeGenerated
