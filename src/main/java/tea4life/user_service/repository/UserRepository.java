@@ -13,4 +13,7 @@ import tea4life.user_service.model.User;
  **/
 @Repository
 public interface UserRepository extends JpaRepository<@NonNull User, @NonNull Long> {
+
+    boolean existsByKeycloakId(String keycloakId);
+
 }
