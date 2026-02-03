@@ -71,7 +71,7 @@ public class UserSyncConsumer {
 
         userRepository.save(newUser);
 
-        log.info("Successfully persisted new user to MariaDB.");
+        log.info("Successfully persisted new user to DB.");
     }
 
 
