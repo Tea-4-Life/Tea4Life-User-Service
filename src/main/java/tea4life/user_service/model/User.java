@@ -32,6 +32,7 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     String email;
 
+    @Column(length = 50)
     String fullName;
 
     String avatarUrl;
