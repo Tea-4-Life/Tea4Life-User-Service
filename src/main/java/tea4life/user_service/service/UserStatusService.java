@@ -19,6 +19,7 @@ import tea4life.user_service.repository.UserRepository;
 public class UserStatusService {
 
     UserRepository userRepository;
+
     StringRedisTemplate stringRedisTemplate;
 
     public UserStatusResponse checkUserStatus(String email) {
