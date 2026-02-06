@@ -6,10 +6,13 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import tea4life.user_service.model.User;
 import tea4life.user_service.repository.UserRepository;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Admin 2/3/2026
@@ -22,6 +25,7 @@ import tea4life.user_service.repository.UserRepository;
 public class UserSyncConsumer {
 
     UserRepository userRepository;
+    StringRedisTemplate stringRedisTemplate;
     ObjectMapper objectMapper;
 
     @KafkaListener(topics = "user-registration", groupId = "tea4life-user-group")
@@ -60,18 +64,32 @@ public class UserSyncConsumer {
     }
 
     private void handleCreateUser(JsonNode payload, String keycloakId) {
-        if (userRepository.existsByKeycloakId(keycloakId)) {
-            log.warn("User {} already exists. Skipping.", keycloakId);
-            return;
+        String email = payload.path("email").asText();
+        stringRedisTemplate.opsForValue().set(
+                "PENDING_USER:" + email,
+                "processing",
+                30,
+                TimeUnit.SECONDS);
+
+        try {
+            if (userRepository.existsByKeycloakId(keycloakId)) {
+                log.warn("User {} already exists. Skipping.", keycloakId);
+                return;
+            }
+
+            User newUser = new User();
+            newUser.setKeycloakId(keycloakId);
+            newUser.setEmail(email);
+            newUser.setOnBoarded(false);
+            userRepository.save(newUser);
+
+            log.info("Successfully persisted new user to DB.");
+        } catch (Exception e) {
+            log.error("Error saving user: {}", e.getMessage());
+            throw e;
+        } finally {
+            stringRedisTemplate.delete("PENDING_USER:" + email);
         }
-
-        User newUser = new User();
-        newUser.setKeycloakId(keycloakId);
-        newUser.setEmail(payload.path("email").asText("no-email"));
-
-        userRepository.save(newUser);
-
-        log.info("Successfully persisted new user to DB.");
     }
 
 

@@ -49,4 +49,6 @@ public class User extends BaseEntity {
     @JoinColumn(name = "role_id")
     Role role;
 
+    @Column(name = "on_boarded", nullable = false)
+    Boolean onBoarded;
 }

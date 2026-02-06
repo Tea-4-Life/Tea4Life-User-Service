@@ -7,6 +7,9 @@ import org.springframework.stereotype.Repository;
 import tea4life.user_service.model.Role;
 import tea4life.user_service.model.User;
 
+import java.util.List;
+import java.util.Optional;
+
 /**
  * Admin 2/3/2026
  *
@@ -15,5 +18,7 @@ import tea4life.user_service.model.User;
 public interface UserRepository extends JpaRepository<@NonNull User, @NonNull Long> {
 
     boolean existsByKeycloakId(String keycloakId);
+
+    Optional<User> findByEmail(String email);
 
 }
