@@ -1,4 +1,4 @@
-package tea4life.user_service.config;
+package tea4life.user_service.config.database;
 
 import java.util.Optional;
 

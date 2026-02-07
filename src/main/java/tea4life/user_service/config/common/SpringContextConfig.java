@@ -1,4 +1,4 @@
-package tea4life.user_service.config;
+package tea4life.user_service.config.common;
 
 import cn.hutool.extra.spring.SpringUtil;
 import org.springframework.context.annotation.Bean;

@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import tea4life.user_service.context.UserContext;
 import tea4life.user_service.dto.base.ApiResponse;
 import tea4life.user_service.dto.response.UserStatusResponse;
 import tea4life.user_service.service.UserStatusService;
@@ -21,9 +22,9 @@ public class UserStatusController {
 
     UserStatusService userStatusService;
 
-    @GetMapping("/public/users/exists/{email}")
-    public ApiResponse<UserStatusResponse> exists(@PathVariable String email) {
-        return new ApiResponse<>(userStatusService.checkUserStatus(email));
+    @GetMapping("/users/exists")
+    public ApiResponse<UserStatusResponse> exists() {
+        return new ApiResponse<>(userStatusService.checkUserStatus());
     }
 
 

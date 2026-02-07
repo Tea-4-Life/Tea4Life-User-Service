@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import tea4life.user_service.context.UserContext;
 import tea4life.user_service.dto.response.UserStatusResponse;
 import tea4life.user_service.dto.response.constant.UserStatus;
 import tea4life.user_service.repository.UserRepository;
@@ -22,7 +23,9 @@ public class UserStatusService {
 
     StringRedisTemplate stringRedisTemplate;
 
-    public UserStatusResponse checkUserStatus(String email) {
+    public UserStatusResponse checkUserStatus() {
+        String email = UserContext.get().getEmail();
+
         return userRepository
                 .findByEmail(email)
                 .map(user -> new UserStatusResponse(

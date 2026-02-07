@@ -4,10 +4,8 @@ package tea4life.user_service.repository;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import tea4life.user_service.model.Role;
 import tea4life.user_service.model.User;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -20,5 +18,7 @@ public interface UserRepository extends JpaRepository<@NonNull User, @NonNull Lo
     boolean existsByKeycloakId(String keycloakId);
 
     Optional<User> findByEmail(String email);
+
+    Optional<User> findByKeycloakId(String keycloakId);
 
 }

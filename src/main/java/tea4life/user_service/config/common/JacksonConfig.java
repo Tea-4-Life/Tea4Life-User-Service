@@ -1,4 +1,4 @@
-package tea4life.user_service.config;
+package tea4life.user_service.config.common;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
