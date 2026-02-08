@@ -18,10 +18,11 @@ public record OnboardingRequest(
         @Pattern(regexp = "^[0-9]{10,15}$", message = "Số điện thoại phải từ 10-11 số")
         String phone,
 
-        @NotNull(message = "Giới tính không được để trống")
+        @NotNull(message = "Ngày sinh không được để trống")
+        @Past(message = "Ngày sinh phải là một ngày trong quá khứ")
         LocalDate dob,
 
-        @Past(message = "Ngày sinh phải là một ngày trong quá khứ")
+        @NotNull(message = "Giới tính không được để trống")
         Gender gender,
 
         @NotBlank(message = "Thiếu mã xác nhận ảnh đại diện")
