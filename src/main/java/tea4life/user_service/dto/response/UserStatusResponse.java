@@ -9,6 +9,8 @@ import tea4life.user_service.dto.response.constant.UserStatus;
 public record UserStatusResponse(
         UserStatus userStatus,
         boolean existed,
-        boolean onboarded
+        boolean onboarded,
+        String email,
+        String role
 ) {
 }

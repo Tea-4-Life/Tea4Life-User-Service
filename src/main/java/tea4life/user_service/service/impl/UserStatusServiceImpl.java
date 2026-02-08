@@ -32,18 +32,29 @@ public class UserStatusServiceImpl implements tea4life.user_service.service.User
                 .map(user -> new UserStatusResponse(
                         UserStatus.SUCCESS,
                         true,
-                        user.getOnBoarded())
+                        user.getOnBoarded(),
+                        user.getEmail(),
+                        user.getRole() != null ? user.getRole().toString() : "")
                 )
                 .orElseGet(() -> {
                     String pending = stringRedisTemplate.opsForValue().get("PENDING_USER:" + email);
 
                     if (pending != null)
-                        return new UserStatusResponse(UserStatus.PROCESSING, false, false);
+                        return new UserStatusResponse(
+                                UserStatus.PROCESSING,
+                                false,
+                                false,
+                                null,
+                                null
+                        );
 
                     return new UserStatusResponse(
                             UserStatus.NOT_FOUND,
                             false,
-                            false);
+                            false,
+                            null,
+                            null
+                    );
                 });
     }
 
