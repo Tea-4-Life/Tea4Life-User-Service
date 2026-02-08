@@ -22,6 +22,9 @@ public record OnboardingRequest(
         LocalDate dob,
 
         @Past(message = "Ngày sinh phải là một ngày trong quá khứ")
-        Gender gender
+        Gender gender,
+
+        @NotBlank(message = "Thiếu mã xác nhận ảnh đại diện")
+        String avatarKey
 ) {
 }
