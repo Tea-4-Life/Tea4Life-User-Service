@@ -21,7 +21,7 @@ public class UserStatusController {
     UserStatusService userStatusService;
 
     @GetMapping("/users/exists")
-    public ApiResponse<UserStatusResponse> exists() {
+    public ApiResponse<UserStatusResponse> checkUserStatus() {
         return new ApiResponse<>(userStatusService.checkUserStatus());
     }
 

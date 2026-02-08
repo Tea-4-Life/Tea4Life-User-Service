@@ -1,5 +1,6 @@
 package tea4life.user_service.controller;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,9 +23,9 @@ public class UserServiceController {
 
     UserService userService;
 
-    @PostMapping("/users/find")
+    @PostMapping("/users/onboarding")
     public ApiResponse<@NonNull Void> processOnboarding(
-            @RequestBody OnboardingRequest onboardingRequest
+            @RequestBody @Valid OnboardingRequest onboardingRequest
     ) {
         userService.processOnboarding(onboardingRequest);
         return ApiResponse.<Void>builder().build();
