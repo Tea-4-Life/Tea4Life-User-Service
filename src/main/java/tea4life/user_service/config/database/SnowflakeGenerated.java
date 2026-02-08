@@ -1,4 +1,4 @@
-package tea4life.user_service.generator;
+package tea4life.user_service.config.database;
 
 import org.hibernate.annotations.IdGeneratorType;
 

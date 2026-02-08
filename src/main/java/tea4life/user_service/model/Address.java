@@ -3,7 +3,7 @@ package tea4life.user_service.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import tea4life.user_service.generator.SnowflakeGenerated;
+import tea4life.user_service.config.database.SnowflakeGenerated;
 import tea4life.user_service.model.base.BaseEntity;
 import tea4life.user_service.model.constant.AddressType;
 

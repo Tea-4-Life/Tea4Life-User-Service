@@ -6,7 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import tea4life.user_service.generator.SnowflakeGenerated;
+import tea4life.user_service.config.database.SnowflakeGenerated;
 import tea4life.user_service.model.base.BaseEntity;
 
 /**
