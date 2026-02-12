@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
  *
  **/
 public record UpdateAvatarRequest(
-        @NotBlank(message = "Họ tên không được để trống")
+        @NotBlank(message = "Ảnh bìa không được để trống")
         String avatarKey
 ) {
 }
