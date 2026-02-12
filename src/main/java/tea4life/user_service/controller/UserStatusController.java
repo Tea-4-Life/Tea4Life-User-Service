@@ -20,7 +20,7 @@ public class UserStatusController {
 
     UserStatusService userStatusService;
 
-    @GetMapping("/users/exists")
+    @GetMapping("/users/me/exists")
     public ApiResponse<UserStatusResponse> checkUserStatus() {
         return new ApiResponse<>(userStatusService.checkUserStatus());
     }

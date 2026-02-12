@@ -6,10 +6,10 @@ import tea4life.user_service.model.constant.Gender;
 import java.time.LocalDate;
 
 /**
- * Admin 2/4/2026
+ * Admin 2/12/2026
  *
  **/
-public record OnboardingRequest(
+public record UpdateProfileRequest(
         @NotBlank(message = "Họ tên không được để trống")
         @Size(min = 2, max = 50, message = "Họ tên phải từ 2-50 ký tự")
         String fullName,
@@ -23,8 +23,6 @@ public record OnboardingRequest(
         LocalDate dob,
 
         @NotNull(message = "Giới tính không được để trống")
-        Gender gender,
-        
-        String avatarKey
+        Gender gender
 ) {
 }

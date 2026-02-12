@@ -5,11 +5,14 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.jspecify.annotations.NonNull;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import tea4life.user_service.dto.base.ApiResponse;
 import tea4life.user_service.dto.request.OnboardingRequest;
+import tea4life.user_service.dto.request.UpdateProfileRequest;
+import tea4life.user_service.dto.response.UserProfileResponse;
 import tea4life.user_service.service.UserService;
 
 /**
@@ -23,11 +26,24 @@ public class UserServiceController {
 
     UserService userService;
 
-    @PostMapping("/users/onboarding")
+    @GetMapping("/users/me")
+    public ApiResponse<UserProfileResponse> getUserProfile() {
+        return new ApiResponse<>(userService.getUserProfile());
+    }
+
+    @PostMapping("/users/me/onboarding")
     public ApiResponse<@NonNull Void> processOnboarding(
-            @RequestBody @Valid OnboardingRequest onboardingRequest
+            @RequestBody @Valid OnboardingRequest request
     ) {
-        userService.processOnboarding(onboardingRequest);
+        userService.processOnboarding(request);
+        return ApiResponse.<Void>builder().build();
+    }
+
+    @PostMapping("/users/me/profile")
+    public ApiResponse<@NonNull Void> updateUserProfile(
+            @RequestBody @Valid UpdateProfileRequest request
+    ) {
+        userService.updateUserProfile(request);
         return ApiResponse.<Void>builder().build();
     }
 

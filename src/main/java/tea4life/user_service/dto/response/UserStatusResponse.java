@@ -10,7 +10,9 @@ public record UserStatusResponse(
         UserStatus userStatus,
         boolean existed,
         boolean onboarded,
+        String fullName,
         String email,
-        String role
+        String role,
+        String avatarUrl
 ) {
 }

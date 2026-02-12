@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import tea4life.user_service.context.UserContext;
 import tea4life.user_service.dto.response.UserStatusResponse;
 import tea4life.user_service.dto.response.constant.UserStatus;
+import tea4life.user_service.model.User;
 import tea4life.user_service.repository.UserRepository;
 
 /**
@@ -23,39 +24,35 @@ public class UserStatusServiceImpl implements tea4life.user_service.service.User
 
     StringRedisTemplate stringRedisTemplate;
 
+    static final String PENDING_USER_PREFIX = "PENDING_USER:";
+
     @Override
     public UserStatusResponse checkUserStatus() {
         String email = UserContext.get().getEmail();
 
         return userRepository
                 .findByEmail(email)
-                .map(user -> new UserStatusResponse(
-                        UserStatus.SUCCESS,
-                        true,
-                        user.getOnBoarded(),
-                        user.getEmail(),
-                        user.getRole() != null ? user.getRole().toString() : "")
-                )
-                .orElseGet(() -> {
-                    String pending = stringRedisTemplate.opsForValue().get("PENDING_USER:" + email);
+                .map(this::buildSuccessResponse)
+                .orElseGet(() -> checkPendingStatus(email));
+    }
 
-                    if (pending != null)
-                        return new UserStatusResponse(
-                                UserStatus.PROCESSING,
-                                false,
-                                false,
-                                null,
-                                null
-                        );
+    private UserStatusResponse buildSuccessResponse(User user) {
+        return new UserStatusResponse(
+                UserStatus.SUCCESS,
+                true,
+                user.getOnBoarded(),
+                user.getFullName(),
+                user.getEmail(),
+                user.getRole() != null ? user.getRole().toString() : "",
+                user.getAvatarUrl());
+    }
 
-                    return new UserStatusResponse(
-                            UserStatus.NOT_FOUND,
-                            false,
-                            false,
-                            null,
-                            null
-                    );
-                });
+    private UserStatusResponse checkPendingStatus(String email) {
+        boolean isPending = Boolean.TRUE.equals(stringRedisTemplate.hasKey(PENDING_USER_PREFIX + email));
+
+        return isPending
+                ? new UserStatusResponse(UserStatus.PROCESSING, false, false, null, null, null, null)
+                : new UserStatusResponse(UserStatus.NOT_FOUND, false, false, null, null, null, null);
     }
 
 }
