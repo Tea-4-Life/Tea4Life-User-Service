@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tea4life.user_service.client.StorageClient;
@@ -12,6 +13,7 @@ import tea4life.user_service.context.UserContext;
 import tea4life.user_service.dto.base.ApiResponse;
 import tea4life.user_service.dto.request.FileMoveRequest;
 import tea4life.user_service.dto.request.OnboardingRequest;
+import tea4life.user_service.dto.request.UpdateAvatarRequest;
 import tea4life.user_service.dto.request.UpdateProfileRequest;
 import tea4life.user_service.dto.response.UserProfileResponse;
 import tea4life.user_service.model.User;
@@ -31,6 +33,8 @@ public class UserServiceImpl implements UserService {
 
     UserRepository userRepository;
     StorageClient storageClient;
+
+    KafkaTemplate<String, String> kafkaTemplate;
 
     @Override
     public void processOnboarding(OnboardingRequest onboardingRequest) {
@@ -103,6 +107,32 @@ public class UserServiceImpl implements UserService {
         user.setPhone(request.phone());
         user.setDob(request.dob());
         user.setGender(request.gender());
+    }
+
+    @Override
+    public void updateUserAvatar(UpdateAvatarRequest request) {
+        String email = UserContext.get().getEmail();
+        User user = userRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng"));
+
+        if (request.avatarKey() != null && !request.avatarKey().isBlank()) {
+            String oldAvatarUrl = user.getAvatarUrl();
+            String destinationPath = "users/avatars/" + user.getId();
+
+            ApiResponse<String> storageResponse = storageClient.confirmFile(
+                    new FileMoveRequest(
+                            request.avatarKey(),
+                            destinationPath
+                    )
+            );
+
+            if (storageResponse.getErrorCode() != null)
+                throw new RuntimeException("Lỗi di chuyển file: " + storageResponse.getErrorMessage());
+            user.setAvatarUrl(storageResponse.getData());
+
+            kafkaTemplate.send("storage-delete-file-topic", oldAvatarUrl);
+        }
     }
 
 }

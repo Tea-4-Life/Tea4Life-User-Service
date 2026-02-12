@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import tea4life.user_service.dto.base.ApiResponse;
 import tea4life.user_service.dto.request.OnboardingRequest;
+import tea4life.user_service.dto.request.UpdateAvatarRequest;
 import tea4life.user_service.dto.request.UpdateProfileRequest;
 import tea4life.user_service.dto.response.UserProfileResponse;
 import tea4life.user_service.service.UserService;
@@ -46,5 +47,14 @@ public class UserServiceController {
         userService.updateUserProfile(request);
         return ApiResponse.<Void>builder().build();
     }
+
+    @PostMapping("/users/me/avatar")
+    public ApiResponse<@NonNull Void> updateUserAvatar(
+            @RequestBody @Valid UpdateAvatarRequest request
+    ) {
+        userService.updateUserAvatar(request);
+        return ApiResponse.<Void>builder().build();
+    }
+
 
 }
