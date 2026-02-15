@@ -1,20 +1,25 @@
 package tea4life.user_service.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.ws.rs.BadRequestException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+import org.keycloak.OAuth2Constants;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.representations.idm.CredentialRepresentation;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tea4life.user_service.client.StorageClient;
 import tea4life.user_service.context.UserContext;
 import tea4life.user_service.dto.base.ApiResponse;
-import tea4life.user_service.dto.request.FileMoveRequest;
-import tea4life.user_service.dto.request.OnboardingRequest;
-import tea4life.user_service.dto.request.UpdateAvatarRequest;
-import tea4life.user_service.dto.request.UpdateProfileRequest;
+import tea4life.user_service.dto.request.*;
 import tea4life.user_service.dto.response.UserProfileResponse;
 import tea4life.user_service.model.User;
 import tea4life.user_service.repository.UserRepository;
@@ -33,8 +38,21 @@ public class UserServiceImpl implements UserService {
 
     UserRepository userRepository;
     StorageClient storageClient;
+    Keycloak keycloak;
 
-    KafkaTemplate<String, String> kafkaTemplate;
+    KafkaTemplate<@NonNull String, @NonNull String> kafkaTemplate;
+
+    @Value("${keycloak.server-url}")
+    @NonFinal
+    String serverUrl;
+
+    @Value("${keycloak.current-realm}")
+    @NonFinal
+    String currentRealm;
+
+    @Value("${keycloak.client-id}")
+    @NonFinal
+    String clientId;
 
     @Override
     public void processOnboarding(OnboardingRequest onboardingRequest) {
@@ -132,6 +150,52 @@ public class UserServiceImpl implements UserService {
             user.setAvatarUrl(storageResponse.getData());
 
             kafkaTemplate.send("storage-delete-file-topic", oldAvatarUrl);
+        }
+    }
+
+    @Override
+    public void changePassword(UpdatePasswordRequest request) {
+        String keycloakId = UserContext.get().getKeycloakId();
+        String email = UserContext.get().getEmail();
+
+        verifyOldPassword(email, request.oldPassword());
+
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(request.newPassword());
+        credential.setTemporary(false);
+
+        try {
+            keycloak.realm(currentRealm)
+                    .users()
+                    .get(keycloakId)
+                    .resetPassword(credential);
+
+            log.info("Successfully updated password for user: {}", keycloakId);
+        } catch (BadRequestException e) {
+            log.error("Password policy violation for user {}: {}", keycloakId, e.getMessage());
+            throw new RuntimeException("Mật khẩu của bạn không đạt chuẩn!");
+        } catch (Exception e) {
+            log.error("Unexpected error during password update for user {}: {}", keycloakId, e.getMessage());
+            throw new RuntimeException("Có lỗi đã xảy ra khi cố cập nhật mật khẩu.");
+        }
+    }
+
+    private void verifyOldPassword(String email, String oldPassword) {
+        try (Keycloak tempKeycloak = KeycloakBuilder
+                .builder()
+                .serverUrl(serverUrl)
+                .realm(currentRealm)
+                .clientId(clientId)
+                .grantType(OAuth2Constants.PASSWORD)
+                .username(email)
+                .password(oldPassword)
+                .build()) {
+
+            tempKeycloak.tokenManager().getAccessToken();
+        } catch (Exception e) {
+            log.warn("Failed password verification attempt for user: {}", email);
+            throw new RuntimeException("Mật khẩu cũ không chính xác!");
         }
     }
 

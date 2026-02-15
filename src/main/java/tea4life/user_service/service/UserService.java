@@ -2,6 +2,7 @@ package tea4life.user_service.service;
 
 import tea4life.user_service.dto.request.OnboardingRequest;
 import tea4life.user_service.dto.request.UpdateAvatarRequest;
+import tea4life.user_service.dto.request.UpdatePasswordRequest;
 import tea4life.user_service.dto.request.UpdateProfileRequest;
 import tea4life.user_service.dto.response.UserProfileResponse;
 
@@ -17,4 +18,6 @@ public interface UserService {
     void updateUserProfile(UpdateProfileRequest request);
 
     void updateUserAvatar(UpdateAvatarRequest request);
+
+    void changePassword(UpdatePasswordRequest request);
 }
