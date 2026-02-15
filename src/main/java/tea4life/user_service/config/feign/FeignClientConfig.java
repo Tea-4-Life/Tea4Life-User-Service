@@ -1,4 +1,4 @@
-package tea4life.user_service.config;
+package tea4life.user_service.config.feign;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
