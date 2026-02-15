@@ -154,7 +154,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void changePassword(UpdatePasswordRequest request) {
+    public void updateUserPassword(UpdatePasswordRequest request) {
         String keycloakId = UserContext.get().getKeycloakId();
         String email = UserContext.get().getEmail();
 

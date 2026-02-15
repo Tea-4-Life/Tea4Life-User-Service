@@ -19,5 +19,5 @@ public interface UserService {
 
     void updateUserAvatar(UpdateAvatarRequest request);
 
-    void changePassword(UpdatePasswordRequest request);
+    void updateUserPassword(UpdatePasswordRequest request);
 }
