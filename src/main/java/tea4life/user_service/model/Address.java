@@ -36,6 +36,12 @@ public class Address extends BaseEntity {
     String ward;     // Phường/Xã
     String detail;   // Số nhà, tên đường
 
+    @Column(name = "latitude", nullable = false)
+    Double latitude;
+
+    @Column(name = "longitude", nullable = false)
+    Double longitude;
+
     @Enumerated(EnumType.STRING)
     AddressType addressType;
 
