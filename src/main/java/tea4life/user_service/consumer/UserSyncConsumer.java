@@ -28,7 +28,7 @@ public class UserSyncConsumer {
     StringRedisTemplate stringRedisTemplate;
     ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "user-registration", groupId = "tea4life-user-group")
+    @KafkaListener(topics = "user-registration", groupId = "tea4life-user-permissionGroup")
     public void listenUserRegistration(String message) {
         try {
             JsonNode payload = objectMapper.readTree(message);

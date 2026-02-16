@@ -10,6 +10,6 @@ import lombok.Builder;
 public record PermissionResponse(
         String id,
         String name,
-        String group,
+        String permissionGroup,
         String description) {
 }

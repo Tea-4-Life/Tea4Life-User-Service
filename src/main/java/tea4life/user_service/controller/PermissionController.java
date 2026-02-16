@@ -25,7 +25,9 @@ public class PermissionController {
     PermissionService permissionService;
 
     @PostMapping("/permissions")
-    public ApiResponse<@NonNull Void> createPermission(UpsertPermissionRequest upsertPermissionRequest) {
+    public ApiResponse<@NonNull Void> createPermission(
+            @RequestBody UpsertPermissionRequest upsertPermissionRequest
+    ) {
         permissionService.createPermission(upsertPermissionRequest);
         return ApiResponse.<Void>builder().build();
     }
@@ -43,7 +45,7 @@ public class PermissionController {
 
     @PostMapping("/permissions/{id}")
     public ApiResponse<@NonNull Void> updatePermission(
-            UpsertPermissionRequest upsertPermissionRequest,
+            @RequestBody UpsertPermissionRequest upsertPermissionRequest,
             @PathVariable("id") Long id
     ) {
         permissionService.updatePermission(upsertPermissionRequest, id);

@@ -30,7 +30,7 @@ public class Permission extends BaseEntity {
     String name;
 
     @Column(nullable = false)
-    String group;
+    String permissionGroup;
 
     String description;
 

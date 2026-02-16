@@ -34,14 +34,14 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public void createPermission(UpsertPermissionRequest upsertPermissionRequest) {
         String name = upsertPermissionRequest.name();
-        String group = upsertPermissionRequest.group();
+        String permissionGroup = upsertPermissionRequest.permissionGroup();
         String description = upsertPermissionRequest.description() != null && !upsertPermissionRequest.description().isBlank()
                 ? upsertPermissionRequest.description()
                 : null;
 
         Permission permission = new Permission();
         permission.setName(name);
-        permission.setGroup(group);
+        permission.setPermissionGroup(permissionGroup);
         permission.setDescription(description);
 
         permissionRepository.save(permission);
@@ -54,7 +54,7 @@ public class PermissionServiceImpl implements PermissionService {
                 .map(permission -> new PermissionResponse(
                         permission.getId().toString(),
                         permission.getName(),
-                        permission.getGroup(),
+                        permission.getPermissionGroup(),
                         permission.getDescription()
                 ));
     }
@@ -67,13 +67,13 @@ public class PermissionServiceImpl implements PermissionService {
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy quyền"));
 
         String name = upsertPermissionRequest.name();
-        String group = upsertPermissionRequest.group();
+        String permissionGroup = upsertPermissionRequest.permissionGroup();
         String description = upsertPermissionRequest.description() != null && !upsertPermissionRequest.description().isBlank()
                 ? upsertPermissionRequest.description()
                 : null;
 
         permission.setName(name);
-        permission.setGroup(group);
+        permission.setPermissionGroup(permissionGroup);
         permission.setDescription(description);
 
         permissionRepository.save(permission);

@@ -1,7 +1,6 @@
 package tea4life.user_service.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 /**
  * Admin 2/16/2026
@@ -13,7 +12,7 @@ public record UpsertPermissionRequest(
         String name,
 
         @NotBlank(message = "Nhóm quyền không được để trống")
-        String group,
+        String permissionGroup,
 
         String description
 ) {
