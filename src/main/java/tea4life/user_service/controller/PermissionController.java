@@ -31,7 +31,7 @@ public class PermissionController {
     }
 
     @GetMapping("/permissions")
-    public ApiResponse<PageResponse<PermissionResponse>> getPermission(
+    public ApiResponse<PageResponse<PermissionResponse>> findAllPermissions(
             @PageableDefault(value = 10) Pageable pageable
     ) {
         PageResponse<PermissionResponse> page = new PageResponse<>(

@@ -52,8 +52,11 @@ public class PermissionServiceImpl implements PermissionService {
         return permissionRepository
                 .findAll(pageable)
                 .map(permission -> new PermissionResponse(
-                        permission.getId(), permission.getName(), permission.getGroup(), permission.getDescription())
-                );
+                        permission.getId().toString(),
+                        permission.getName(),
+                        permission.getGroup(),
+                        permission.getDescription()
+                ));
     }
 
     @Override

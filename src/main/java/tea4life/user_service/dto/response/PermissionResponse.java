@@ -8,7 +8,7 @@ import lombok.Builder;
  **/
 @Builder
 public record PermissionResponse(
-        Long id,
+        String id,
         String name,
         String group,
         String description) {
