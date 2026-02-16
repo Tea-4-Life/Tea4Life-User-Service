@@ -13,4 +13,7 @@ import tea4life.user_service.model.Permission;
  **/
 @Repository
 public interface PermissionRepository extends JpaRepository<@NonNull Permission, @NonNull Long> {
+
+    boolean existsByName(String name);
+
 }

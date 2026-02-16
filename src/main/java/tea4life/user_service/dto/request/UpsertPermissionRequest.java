@@ -1,6 +1,7 @@
 package tea4life.user_service.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Admin 2/16/2026

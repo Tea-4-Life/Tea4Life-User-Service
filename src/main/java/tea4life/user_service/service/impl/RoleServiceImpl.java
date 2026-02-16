@@ -23,5 +23,4 @@ public class RoleServiceImpl {
     RoleRepository roleRepository;
     PermissionRepository permissionRepository;
 
-
 }
