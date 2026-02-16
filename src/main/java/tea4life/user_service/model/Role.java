@@ -28,6 +28,8 @@ public class Role extends BaseEntity {
     @Column(unique = true, nullable = false)
     String name;
 
+    String description;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "roles_permissions",

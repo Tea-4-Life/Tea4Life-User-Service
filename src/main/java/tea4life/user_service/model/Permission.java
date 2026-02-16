@@ -29,6 +29,9 @@ public class Permission extends BaseEntity {
     @Column(unique = true, nullable = false)
     String name;
 
+    @Column(nullable = false)
+    String group;
+
     String description;
 
 }
