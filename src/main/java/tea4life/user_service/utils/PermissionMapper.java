@@ -11,27 +11,29 @@ import tea4life.user_service.model.Permission;
 public class PermissionMapper {
 
     public static PermissionResponse mapToPermissionResponse(Permission permission) {
-        return new PermissionResponse(
-                permission.getId().toString(),
-                permission.getName(),
-                permission.getPermissionGroup(),
-                permission.getDescription()
-        );
+        return PermissionResponse
+                .builder()
+                .id(permission.getId().toString())
+                .name(permission.getName())
+                .permissionGroup(permission.getPermissionGroup())
+                .description(permission.getDescription())
+                .build();
     }
 
     public static Permission mapToPermission(UpsertPermissionRequest upsertPermissionRequest) {
+        String name = upsertPermissionRequest.name().toUpperCase();
         String permissionGroup = upsertPermissionRequest.permissionGroup();
         String description =
                 upsertPermissionRequest.description() != null && !upsertPermissionRequest.description().isBlank()
                         ? upsertPermissionRequest.description()
                         : null;
 
-        return new Permission(
-                null,
-                upsertPermissionRequest.name(),
-                permissionGroup,
-                description
-        );
+        return Permission
+                .builder()
+                .name(name)
+                .permissionGroup(permissionGroup)
+                .description(description)
+                .build();
     }
 
 }

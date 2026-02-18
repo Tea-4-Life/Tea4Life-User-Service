@@ -19,6 +19,7 @@ import tea4life.user_service.model.base.BaseEntity;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Permission extends BaseEntity {
 
