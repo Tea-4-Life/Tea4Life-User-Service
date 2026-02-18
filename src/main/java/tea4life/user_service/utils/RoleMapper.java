@@ -27,12 +27,27 @@ public class RoleMapper {
     }
 
     public static Role mapToRole(UpsertRoleRequest upsertRoleRequest) {
-        return new Role(
-                null,
-                upsertRoleRequest.name(),
-                upsertRoleRequest.description(),
-                null
-        );
+        String name = upsertRoleRequest.name().toUpperCase();
+        String description =
+                upsertRoleRequest.description() != null && !upsertRoleRequest.description().isBlank()
+                        ? upsertRoleRequest.description()
+                        : null;
+
+        return Role
+                .builder()
+                .name(name)
+                .description(description)
+                .build();
+    }
+
+    public static void updateRoleFromRequest(Role role, UpsertRoleRequest upsertRoleRequest) {
+        String name = upsertRoleRequest.name().toUpperCase();
+        String description = upsertRoleRequest.description() != null && !upsertRoleRequest.description().isBlank()
+                ? upsertRoleRequest.description()
+                : null;
+
+        role.setName(name);
+        role.setDescription(description);
     }
 
 }

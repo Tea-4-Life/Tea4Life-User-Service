@@ -68,15 +68,11 @@ public class RoleServiceImpl {
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy chức vụ"));
 
         String name = upsertRoleRequest.name().toUpperCase();
-        String description = upsertRoleRequest.description() != null && !upsertRoleRequest.description().isBlank()
-                ? upsertRoleRequest.description()
-                : null;
 
         if (roleRepository.existsByNameAndIdNot(name, role.getId()))
             throw new DataIntegrityViolationException("Tên chức vụ đã tồn tại");
 
-        role.setName(name);
-        role.setDescription(description);
+        RoleMapper.updateRoleFromRequest(role, upsertRoleRequest);
 
         if (upsertRoleRequest.permissionIdList() != null && !upsertRoleRequest.permissionIdList().isEmpty()) {
             Set<Permission> permissionList = new HashSet<>(
