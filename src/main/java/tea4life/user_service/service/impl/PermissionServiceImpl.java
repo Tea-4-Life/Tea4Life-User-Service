@@ -16,6 +16,7 @@ import tea4life.user_service.dto.response.PermissionResponse;
 import tea4life.user_service.model.Permission;
 import tea4life.user_service.repository.PermissionRepository;
 import tea4life.user_service.service.PermissionService;
+import tea4life.user_service.utils.PermissionMapper;
 
 /**
  * Admin 2/16/2026
@@ -33,19 +34,11 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public void createPermission(UpsertPermissionRequest upsertPermissionRequest) {
         String name = upsertPermissionRequest.name().toUpperCase();
-        String permissionGroup = upsertPermissionRequest.permissionGroup();
-        String description = upsertPermissionRequest.description() != null && !upsertPermissionRequest.description().isBlank()
-                ? upsertPermissionRequest.description()
-                : null;
 
         if (permissionRepository.existsByName(name))
             throw new DataIntegrityViolationException("Tên quyền này đã tồn tại");
 
-        Permission permission = new Permission();
-        permission.setName(name);
-        permission.setPermissionGroup(permissionGroup);
-        permission.setDescription(description);
-
+        Permission permission = PermissionMapper.mapToPermission(upsertPermissionRequest);
         permissionRepository.save(permission);
     }
 
@@ -54,17 +47,11 @@ public class PermissionServiceImpl implements PermissionService {
     public Page<@NonNull PermissionResponse> findAllPermissions(Pageable pageable) {
         return permissionRepository
                 .findAll(pageable)
-                .map(permission -> new PermissionResponse(
-                        permission.getId().toString(),
-                        permission.getName(),
-                        permission.getPermissionGroup(),
-                        permission.getDescription()
-                ));
+                .map(PermissionMapper::mapToPermissionResponse);
     }
 
     @Override
     public void updatePermission(UpsertPermissionRequest upsertPermissionRequest, Long id) {
-
         Permission permission = permissionRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy quyền"));
@@ -75,7 +62,7 @@ public class PermissionServiceImpl implements PermissionService {
                 ? upsertPermissionRequest.description()
                 : null;
 
-        if (permissionRepository.existsByNameAndIdNot(name.toUpperCase(), permission.getId()))
+        if (permissionRepository.existsByNameAndIdNot(name, permission.getId()))
             throw new DataIntegrityViolationException("Tên quyền này đã tồn tại");
 
 
