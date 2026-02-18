@@ -1,5 +1,6 @@
 package tea4life.user_service.controller;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -26,7 +27,7 @@ public class PermissionController {
 
     @PostMapping("/permissions")
     public ApiResponse<@NonNull Void> createPermission(
-            @RequestBody UpsertPermissionRequest upsertPermissionRequest
+            @RequestBody @Valid UpsertPermissionRequest upsertPermissionRequest
     ) {
         permissionService.createPermission(upsertPermissionRequest);
         return ApiResponse.<Void>builder().build();
@@ -45,7 +46,7 @@ public class PermissionController {
 
     @PostMapping("/permissions/{id}")
     public ApiResponse<@NonNull Void> updatePermission(
-            @RequestBody UpsertPermissionRequest upsertPermissionRequest,
+            @RequestBody @Valid UpsertPermissionRequest upsertPermissionRequest,
             @PathVariable("id") Long id
     ) {
         permissionService.updatePermission(upsertPermissionRequest, id);

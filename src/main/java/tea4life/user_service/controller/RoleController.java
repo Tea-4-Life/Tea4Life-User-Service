@@ -1,6 +1,7 @@
 
 package tea4life.user_service.controller;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,7 +28,7 @@ public class RoleController {
 
     @PostMapping("/roles")
     public ApiResponse<@NonNull Void> createPermission(
-            @RequestBody UpsertRoleRequest upsertRoleRequest
+            @RequestBody @Valid UpsertRoleRequest upsertRoleRequest
     ) {
         roleService.createRole(upsertRoleRequest);
         return ApiResponse.<Void>builder().build();
@@ -46,7 +47,7 @@ public class RoleController {
 
     @PostMapping("/roles/{id}")
     public ApiResponse<@NonNull Void> updatePermission(
-            @RequestBody UpsertRoleRequest upsertRoleRequest,
+            @RequestBody @Valid UpsertRoleRequest upsertRoleRequest,
             @PathVariable("id") Long id
     ) {
         roleService.updateRole(upsertRoleRequest, id);
