@@ -45,6 +45,11 @@ public class RoleController {
         return new ApiResponse<>(page);
     }
 
+    @GetMapping("/roles/{id}")
+    public ApiResponse<RoleResponse> findById(@PathVariable("id") Long id) {
+        return new ApiResponse<>(roleService.findById(id));
+    }
+
     @PostMapping("/roles/{id}")
     public ApiResponse<@NonNull Void> updatePermission(
             @RequestBody @Valid UpsertRoleRequest upsertRoleRequest,

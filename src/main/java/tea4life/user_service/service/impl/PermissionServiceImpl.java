@@ -61,7 +61,7 @@ public class PermissionServiceImpl implements PermissionService {
                 .map(PermissionMapper::mapToPermissionResponse)
                 .toList();
     }
-
+    
     @Override
     public void updatePermission(UpsertPermissionRequest upsertPermissionRequest, Long id) {
         Permission permission = permissionRepository

@@ -17,6 +17,8 @@ public interface RoleService {
     @Transactional(readOnly = true)
     Page<@NonNull RoleResponse> findAllRoles(Pageable pageable);
 
+    RoleResponse findById(Long id);
+
     void updateRole(UpsertRoleRequest upsertRoleRequest, Long id);
 
     void deleteRoleById(Long id);

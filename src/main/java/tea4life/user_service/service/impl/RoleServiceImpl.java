@@ -66,6 +66,14 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    public RoleResponse findById(Long id) {
+        return roleRepository
+                .findById(id)
+                .map(RoleMapper::mapToRoleResponse)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy chức vụ"));
+    }
+
+    @Override
     public void updateRole(UpsertRoleRequest upsertRoleRequest, Long id) {
         Role role = roleRepository
                 .findById(id)
