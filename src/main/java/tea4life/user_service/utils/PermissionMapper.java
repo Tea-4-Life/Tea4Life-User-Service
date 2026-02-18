@@ -36,4 +36,19 @@ public class PermissionMapper {
                 .build();
     }
 
+    public static void updatePermissionFromRequest(
+            Permission permission,
+            UpsertPermissionRequest upsertPermissionRequest
+    ) {
+        String name = upsertPermissionRequest.name().toUpperCase();
+        String permissionGroup = upsertPermissionRequest.permissionGroup();
+        String description = upsertPermissionRequest.description() != null && !upsertPermissionRequest.description().isBlank()
+                ? upsertPermissionRequest.description()
+                : null;
+
+        permission.setName(name);
+        permission.setPermissionGroup(permissionGroup);
+        permission.setDescription(description);
+    }
+
 }

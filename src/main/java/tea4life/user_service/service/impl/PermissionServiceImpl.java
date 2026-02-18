@@ -57,18 +57,11 @@ public class PermissionServiceImpl implements PermissionService {
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy quyền"));
 
         String name = upsertPermissionRequest.name().toUpperCase();
-        String permissionGroup = upsertPermissionRequest.permissionGroup();
-        String description = upsertPermissionRequest.description() != null && !upsertPermissionRequest.description().isBlank()
-                ? upsertPermissionRequest.description()
-                : null;
 
         if (permissionRepository.existsByNameAndIdNot(name, permission.getId()))
             throw new DataIntegrityViolationException("Tên quyền này đã tồn tại");
 
-
-        permission.setName(name);
-        permission.setPermissionGroup(permissionGroup);
-        permission.setDescription(description);
+        PermissionMapper.updatePermissionFromRequest(permission, upsertPermissionRequest);
 
         permissionRepository.save(permission);
     }
