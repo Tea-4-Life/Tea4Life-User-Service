@@ -2,7 +2,6 @@ package tea4life.user_service.dto.response;
 
 import lombok.Builder;
 
-import java.util.List;
 import java.util.Set;
 
 /**
