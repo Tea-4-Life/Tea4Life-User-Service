@@ -14,6 +14,8 @@ import tea4life.user_service.dto.request.UpsertPermissionRequest;
 import tea4life.user_service.dto.response.PermissionResponse;
 import tea4life.user_service.service.PermissionService;
 
+import java.util.List;
+
 /**
  * Admin 2/16/2026
  *
@@ -42,6 +44,11 @@ public class PermissionController {
         );
 
         return new ApiResponse<>(page);
+    }
+
+    @GetMapping("/permissions/all")
+    public ApiResponse<List<PermissionResponse>> findAllPermissions() {
+        return new ApiResponse<>(permissionService.findAllPermissions());
     }
 
     @PostMapping("/permissions/{id}")

@@ -18,6 +18,8 @@ import tea4life.user_service.repository.PermissionRepository;
 import tea4life.user_service.service.PermissionService;
 import tea4life.user_service.utils.PermissionMapper;
 
+import java.util.List;
+
 /**
  * Admin 2/16/2026
  *
@@ -48,6 +50,16 @@ public class PermissionServiceImpl implements PermissionService {
         return permissionRepository
                 .findAll(pageable)
                 .map(PermissionMapper::mapToPermissionResponse);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<PermissionResponse> findAllPermissions() {
+        return permissionRepository
+                .findAll()
+                .stream()
+                .map(PermissionMapper::mapToPermissionResponse)
+                .toList();
     }
 
     @Override
