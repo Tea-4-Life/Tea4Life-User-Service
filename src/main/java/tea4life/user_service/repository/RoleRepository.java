@@ -13,4 +13,9 @@ import tea4life.user_service.model.Role;
  **/
 @Repository
 public interface RoleRepository extends JpaRepository<@NonNull Role, @NonNull Long> {
+
+    boolean existsByName(String name);
+
+    boolean existsByNameAndIdNot(String name, Long id);
+
 }
