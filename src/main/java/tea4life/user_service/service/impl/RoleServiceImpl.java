@@ -17,6 +17,7 @@ import tea4life.user_service.model.Permission;
 import tea4life.user_service.model.Role;
 import tea4life.user_service.repository.PermissionRepository;
 import tea4life.user_service.repository.RoleRepository;
+import tea4life.user_service.service.RoleService;
 import tea4life.user_service.utils.RoleMapper;
 
 import java.util.HashSet;
@@ -31,11 +32,12 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 @Transactional
-public class RoleServiceImpl {
+public class RoleServiceImpl implements RoleService {
 
     RoleRepository roleRepository;
     PermissionRepository permissionRepository;
 
+    @Override
     public void createRole(UpsertRoleRequest upsertRoleRequest) {
         String name = upsertRoleRequest.name().toUpperCase();
 
@@ -56,12 +58,14 @@ public class RoleServiceImpl {
     }
 
     @Transactional(readOnly = true)
+    @Override
     public Page<@NonNull RoleResponse> findAllRoles(Pageable pageable) {
         return roleRepository
                 .findAll(pageable)
                 .map(RoleMapper::mapToRoleResponse);
     }
 
+    @Override
     public void updateRole(UpsertRoleRequest upsertRoleRequest, Long id) {
         Role role = roleRepository
                 .findById(id)
@@ -85,6 +89,7 @@ public class RoleServiceImpl {
         roleRepository.save(role);
     }
 
+    @Override
     public void deleteRoleById(Long id) {
         Role role = roleRepository
                 .findById(id)
