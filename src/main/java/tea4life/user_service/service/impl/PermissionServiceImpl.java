@@ -6,6 +6,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,6 @@ import tea4life.user_service.dto.request.UpsertPermissionRequest;
 import tea4life.user_service.dto.response.PermissionResponse;
 import tea4life.user_service.model.Permission;
 import tea4life.user_service.repository.PermissionRepository;
-import tea4life.user_service.repository.RoleRepository;
 import tea4life.user_service.service.PermissionService;
 
 /**
@@ -28,16 +28,18 @@ import tea4life.user_service.service.PermissionService;
 @Transactional
 public class PermissionServiceImpl implements PermissionService {
 
-    RoleRepository roleRepository;
     PermissionRepository permissionRepository;
 
     @Override
     public void createPermission(UpsertPermissionRequest upsertPermissionRequest) {
-        String name = upsertPermissionRequest.name();
+        String name = upsertPermissionRequest.name().toUpperCase();
         String permissionGroup = upsertPermissionRequest.permissionGroup();
         String description = upsertPermissionRequest.description() != null && !upsertPermissionRequest.description().isBlank()
                 ? upsertPermissionRequest.description()
                 : null;
+
+        if (permissionRepository.existsByName(name))
+            throw new DataIntegrityViolationException("Tên quyền này đã tồn tại");
 
         Permission permission = new Permission();
         permission.setName(name);
@@ -48,6 +50,7 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<@NonNull PermissionResponse> findAllPermissions(Pageable pageable) {
         return permissionRepository
                 .findAll(pageable)
@@ -66,11 +69,15 @@ public class PermissionServiceImpl implements PermissionService {
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy quyền"));
 
-        String name = upsertPermissionRequest.name();
+        String name = upsertPermissionRequest.name().toUpperCase();
         String permissionGroup = upsertPermissionRequest.permissionGroup();
         String description = upsertPermissionRequest.description() != null && !upsertPermissionRequest.description().isBlank()
                 ? upsertPermissionRequest.description()
                 : null;
+
+        if (permissionRepository.existsByNameAndIdNot(name.toUpperCase(), permission.getId()))
+            throw new DataIntegrityViolationException("Tên quyền này đã tồn tại");
+
 
         permission.setName(name);
         permission.setPermissionGroup(permissionGroup);

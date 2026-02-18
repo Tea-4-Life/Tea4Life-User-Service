@@ -7,6 +7,9 @@ import org.springframework.stereotype.Repository;
 import tea4life.user_service.model.Address;
 import tea4life.user_service.model.Permission;
 
+import java.util.List;
+import java.util.Optional;
+
 /**
  * Admin 2/3/2026
  *
@@ -15,5 +18,7 @@ import tea4life.user_service.model.Permission;
 public interface PermissionRepository extends JpaRepository<@NonNull Permission, @NonNull Long> {
 
     boolean existsByName(String name);
+
+    boolean existsByNameAndIdNot(String name, Long id);
 
 }
