@@ -10,6 +10,7 @@ import tea4life.user_service.context.UserContext;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,7 +32,7 @@ public class UserContextFilter implements Filter {
         String email = httpRequest.getHeader("X-User-Email");
         String userKeycloakId = httpRequest.getHeader("X-User-KeycloakId");
         String authoritiesRaw = httpRequest.getHeader("X-User-Authorities");
-
+        
         /**
          * =============================================
          * ĐỒNG BỘ HÓA SPRING SECURITY CONTEXT
@@ -40,12 +41,16 @@ public class UserContextFilter implements Filter {
          * =============================================
          **/
 
-        List<SimpleGrantedAuthority> authorities = authoritiesRaw != null
-                ? Arrays.stream(authoritiesRaw.split(",")).map(SimpleGrantedAuthority::new).toList()
-                : List.of();
+        List<SimpleGrantedAuthority> authorities = Collections.emptyList();
 
-        UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(email, null, authorities);
+        if (authoritiesRaw != null && !authoritiesRaw.isBlank()) {
+            authorities = Arrays.stream(authoritiesRaw.split(","))
+                    .filter(auth -> !auth.isBlank())
+                    .map(SimpleGrantedAuthority::new)
+                    .toList();
+        }
+
+        var auth = new UsernamePasswordAuthenticationToken(email, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         /**
