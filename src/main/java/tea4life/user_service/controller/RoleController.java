@@ -22,11 +22,12 @@ import tea4life.user_service.service.RoleService;
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequestMapping("/roles")
 public class RoleController {
 
     RoleService roleService;
 
-    @PostMapping("/roles")
+    @PostMapping()
     public ApiResponse<@NonNull Void> createPermission(
             @RequestBody @Valid UpsertRoleRequest upsertRoleRequest
     ) {
@@ -34,7 +35,7 @@ public class RoleController {
         return ApiResponse.<Void>builder().build();
     }
 
-    @GetMapping("/roles")
+    @GetMapping()
     public ApiResponse<PageResponse<RoleResponse>> findAllPermissions(
             @PageableDefault(value = 10) Pageable pageable
     ) {
@@ -45,12 +46,12 @@ public class RoleController {
         return new ApiResponse<>(page);
     }
 
-    @GetMapping("/roles/{id}")
+    @GetMapping("/{id}")
     public ApiResponse<RoleResponse> findById(@PathVariable("id") Long id) {
         return new ApiResponse<>(roleService.findById(id));
     }
 
-    @PostMapping("/roles/{id}")
+    @PostMapping("/{id}")
     public ApiResponse<@NonNull Void> updatePermission(
             @RequestBody @Valid UpsertRoleRequest upsertRoleRequest,
             @PathVariable("id") Long id
@@ -59,7 +60,7 @@ public class RoleController {
         return ApiResponse.<Void>builder().build();
     }
 
-    @DeleteMapping("/roles/{id}")
+    @DeleteMapping("/{id}")
     public ApiResponse<@NonNull Void> deletePermission(
             @PathVariable("id") Long id
     ) {

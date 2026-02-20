@@ -23,11 +23,12 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequestMapping("/permissions")
 public class PermissionController {
 
     PermissionService permissionService;
 
-    @PostMapping("/permissions")
+    @PostMapping()
     public ApiResponse<@NonNull Void> createPermission(
             @RequestBody @Valid UpsertPermissionRequest upsertPermissionRequest
     ) {
@@ -35,7 +36,7 @@ public class PermissionController {
         return ApiResponse.<Void>builder().build();
     }
 
-    @GetMapping("/permissions")
+    @GetMapping()
     public ApiResponse<PageResponse<PermissionResponse>> findAllPermissions(
             @PageableDefault(value = 10) Pageable pageable
     ) {
@@ -46,12 +47,12 @@ public class PermissionController {
         return new ApiResponse<>(page);
     }
 
-    @GetMapping("/permissions/all")
+    @GetMapping("/all")
     public ApiResponse<List<PermissionResponse>> findAllPermissions() {
         return new ApiResponse<>(permissionService.findAllPermissions());
     }
 
-    @PostMapping("/permissions/{id}")
+    @PostMapping("/{id}")
     public ApiResponse<@NonNull Void> updatePermission(
             @RequestBody @Valid UpsertPermissionRequest upsertPermissionRequest,
             @PathVariable("id") Long id
@@ -60,7 +61,7 @@ public class PermissionController {
         return ApiResponse.<Void>builder().build();
     }
 
-    @DeleteMapping("/permissions/{id}")
+    @DeleteMapping("/{id}")
     public ApiResponse<@NonNull Void> deletePermission(
             @PathVariable("id") Long id
     ) {

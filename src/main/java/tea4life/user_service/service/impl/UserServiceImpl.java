@@ -20,10 +20,16 @@ import tea4life.user_service.client.StorageClient;
 import tea4life.user_service.context.UserContext;
 import tea4life.user_service.dto.base.ApiResponse;
 import tea4life.user_service.dto.request.*;
+import tea4life.user_service.dto.response.UserPermissionsResponse;
 import tea4life.user_service.dto.response.UserProfileResponse;
+import tea4life.user_service.model.Permission;
 import tea4life.user_service.model.User;
 import tea4life.user_service.repository.UserRepository;
 import tea4life.user_service.service.UserService;
+
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Admin 2/8/2026
@@ -179,6 +185,20 @@ public class UserServiceImpl implements UserService {
             log.error("Unexpected error during password update for user {}: {}", keycloakId, e.getMessage());
             throw new RuntimeException("Có lỗi đã xảy ra khi cố cập nhật mật khẩu.");
         }
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public UserPermissionsResponse getUserPermissions(String keycloakId) {
+        User user = userRepository
+                .findByKeycloakId(keycloakId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng"));
+
+        Set<String> permissions = (user.getRole() != null)
+                ? user.getRole().getPermissions().stream().map(Permission::getName).collect(Collectors.toSet())
+                : Collections.emptySet();
+
+        return new UserPermissionsResponse(user.getEmail(), permissions);
     }
 
     private void verifyOldPassword(String email, String oldPassword) {
