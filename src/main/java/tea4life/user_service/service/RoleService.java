@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import tea4life.user_service.dto.request.UpsertRoleRequest;
 import tea4life.user_service.dto.response.RoleResponse;
 
+import java.util.List;
+
 /**
  * Admin 2/18/2026
  *
@@ -16,6 +18,9 @@ public interface RoleService {
 
     @Transactional(readOnly = true)
     Page<@NonNull RoleResponse> findAllRoles(Pageable pageable);
+
+    @Transactional(readOnly = true)
+    List<RoleResponse> findAllRoles();
 
     RoleResponse findById(Long id);
 

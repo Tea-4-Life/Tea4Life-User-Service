@@ -20,6 +20,7 @@ import tea4life.user_service.repository.RoleRepository;
 import tea4life.user_service.service.RoleService;
 import tea4life.user_service.utils.RoleMapper;
 
+import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -63,6 +64,16 @@ public class RoleServiceImpl implements RoleService {
         return roleRepository
                 .findAll(pageable)
                 .map(RoleMapper::mapToRoleResponse);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<RoleResponse> findAllRoles() {
+        return roleRepository
+                .findAll()
+                .stream()
+                .map(RoleMapper::mapToRoleResponse)
+                .toList();
     }
 
     @Override
