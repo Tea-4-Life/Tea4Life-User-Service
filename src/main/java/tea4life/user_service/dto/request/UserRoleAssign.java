@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
  **/
 public record UserRoleAssign(
         @NotNull(message = "Chức vụ không được để trống")
-        Long roleId,
+        String roleId,
 
         @NotBlank(message = "KeycloakId không được để trống")
         String keycloakId

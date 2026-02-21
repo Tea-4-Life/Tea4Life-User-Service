@@ -56,7 +56,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng"));
 
         Role role = roleRepository
-                .findById(request.roleId())
+                .findById(Long.parseLong(request.roleId()))
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy chức vụ"));
 
         user.setRole(role);
