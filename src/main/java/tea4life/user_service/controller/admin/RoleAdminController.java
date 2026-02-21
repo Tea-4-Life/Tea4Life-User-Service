@@ -1,5 +1,5 @@
 
-package tea4life.user_service.controller;
+package tea4life.user_service.controller.admin;
 
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -14,6 +14,8 @@ import tea4life.user_service.dto.base.PageResponse;
 import tea4life.user_service.dto.request.UpsertRoleRequest;
 import tea4life.user_service.dto.response.RoleResponse;
 import tea4life.user_service.service.RoleService;
+
+import java.util.List;
 
 /**
  * Admin 2/16/2026
@@ -36,7 +38,7 @@ public class RoleAdminController {
     }
 
     @GetMapping()
-    public ApiResponse<PageResponse<RoleResponse>> findAllPermissions(
+    public ApiResponse<PageResponse<RoleResponse>> findAllRoles(
             @PageableDefault(value = 10) Pageable pageable
     ) {
         PageResponse<RoleResponse> page = new PageResponse<>(
@@ -47,7 +49,7 @@ public class RoleAdminController {
     }
 
     @GetMapping("/all")
-    public ApiResponse<java.util.List<RoleResponse>> findAllRoles() {
+    public ApiResponse<List<RoleResponse>> findAllRoles() {
         return new ApiResponse<>(roleService.findAllRoles());
     }
 
