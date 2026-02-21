@@ -32,7 +32,7 @@ public class UserContextFilter implements Filter {
         String email = httpRequest.getHeader("X-User-Email");
         String userKeycloakId = httpRequest.getHeader("X-User-KeycloakId");
         String authoritiesRaw = httpRequest.getHeader("X-User-Authorities");
-        
+
         /**
          * =============================================
          * ĐỒNG BỘ HÓA SPRING SECURITY CONTEXT
