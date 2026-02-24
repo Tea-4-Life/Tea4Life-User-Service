@@ -50,6 +50,11 @@ public class AddressController {
         return new ApiResponse<>(addressService.updateMyAddress(id, request));
     }
 
+    @PostMapping("/{id}/default")
+    public ApiResponse<AddressResponse> setDefaultMyAddress(@PathVariable("id") Long id) {
+        return new ApiResponse<>(addressService.setDefaultMyAddress(id));
+    }
+
     @DeleteMapping("/{id}")
     public ApiResponse<@NonNull Void> deleteMyAddress(@PathVariable("id") Long id) {
         addressService.deleteMyAddress(id);

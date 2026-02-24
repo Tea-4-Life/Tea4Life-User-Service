@@ -21,5 +21,7 @@ public interface AddressService {
 
     AddressResponse updateMyAddress(Long id, CreateAddressRequest request);
 
+    AddressResponse setDefaultMyAddress(Long id);
+
     void deleteMyAddress(Long id);
 }

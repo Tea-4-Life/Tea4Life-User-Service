@@ -88,6 +88,15 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
+    public AddressResponse setDefaultMyAddress(Long id) {
+        User user = getCurrentUser();
+        Address address = findAddressByIdAndUserId(id, user.getId());
+        setAllAddressesNonDefault(user.getId());
+        address.setDefault(true);
+        return toResponse(addressRepository.save(address));
+    }
+
+    @Override
     public void deleteMyAddress(Long id) {
         User user = getCurrentUser();
         Address address = findAddressByIdAndUserId(id, user.getId());
