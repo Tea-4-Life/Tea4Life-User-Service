@@ -20,9 +20,6 @@ public record CreateAddressRequest(
         @NotBlank(message = "Tỉnh/Thành phố không được để trống")
         String province,
 
-        @NotBlank(message = "Quận/Huyện không được để trống")
-        String district,
-
         @NotBlank(message = "Phường/Xã không được để trống")
         String ward,
 

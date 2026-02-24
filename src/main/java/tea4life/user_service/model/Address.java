@@ -32,7 +32,6 @@ public class Address extends BaseEntity {
     String phone;
 
     String province; // Tỉnh/Thành phố
-    String district; // Quận/Huyện
     String ward;     // Phường/Xã
     String detail;   // Số nhà, tên đường
 
