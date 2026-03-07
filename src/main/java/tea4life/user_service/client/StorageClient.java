@@ -10,7 +10,7 @@ import tea4life.user_service.dto.request.FileMoveRequest;
  * Admin 2/8/2026
  *
  **/
-@FeignClient(name = "TEA4LIFE-STORAGE-SERVICE", url = "${openfeign.storage.url}")
+@FeignClient(name = "TEA4LIFE-STORAGE-SERVICE", url = "${service.url.storage}")
 public interface StorageClient {
 
     @PostMapping("/storage/confirm")
