@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class SpringContextConfig {
 
     @Bean
-    public SpringUtil springUtil() {
+    public static SpringUtil springUtil() {
         return new SpringUtil();
     }
 }
