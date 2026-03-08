@@ -60,6 +60,10 @@ public class UserServiceImpl implements UserService {
     @NonFinal
     String clientId;
 
+    @Value("${spring.kafka.topic.storage-delete-file}")
+    @NonFinal
+    String storageDeleteFileTopic;
+
     @Override
     public void processOnboarding(OnboardingRequest onboardingRequest) {
         String email = UserContext.get().getEmail();
@@ -155,7 +159,7 @@ public class UserServiceImpl implements UserService {
                 throw new RuntimeException("Lỗi di chuyển file: " + storageResponse.getErrorMessage());
             user.setAvatarUrl(storageResponse.getData());
 
-            kafkaTemplate.send("storage-delete-file-topic", oldAvatarUrl);
+            kafkaTemplate.send(storageDeleteFileTopic, oldAvatarUrl);
         }
     }
 
