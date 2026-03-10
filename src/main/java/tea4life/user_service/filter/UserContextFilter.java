@@ -50,8 +50,11 @@ public class UserContextFilter implements Filter {
                     .toList();
         }
 
-        var auth = new UsernamePasswordAuthenticationToken(email, null, authorities);
-        SecurityContextHolder.getContext().setAuthentication(auth);
+        if (hasText(email) || hasText(userKeycloakId) || !authorities.isEmpty()) {
+            var auth = new UsernamePasswordAuthenticationToken(email, null, authorities);
+            SecurityContextHolder.getContext().setAuthentication(auth);
+        } else SecurityContextHolder.clearContext();
+
 
         /**
          * =============================================
@@ -61,12 +64,16 @@ public class UserContextFilter implements Filter {
          * =============================================
          **/
 
-        UserContext context = UserContext.builder()
-                .email(email)
-                .keycloakId(userKeycloakId)
-                .build();
+        if (hasText(email) || hasText(userKeycloakId)) {
+            UserContext context = UserContext
+                    .builder()
+                    .email(email)
+                    .keycloakId(userKeycloakId)
+                    .build();
 
-        UserContext.set(context);
+            UserContext.set(context);
+        } else UserContext.clear();
+
 
         try {
             filterChain.doFilter(servletRequest, servletResponse);
@@ -75,5 +82,9 @@ public class UserContextFilter implements Filter {
             SecurityContextHolder.clearContext();
         }
 
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

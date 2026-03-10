@@ -19,10 +19,17 @@ public class FeignClientConfig {
             UserContext context = UserContext.get();
 
             if (context != null) {
-                template.header("X-User-KeycloakId", context.getKeycloakId());
-                template.header("X-User-Email", context.getEmail());
+                if (hasText(context.getKeycloakId())) {
+                    template.header("X-User-KeycloakId", context.getKeycloakId());
+                }
+                if (hasText(context.getEmail())) {
+                    template.header("X-User-Email", context.getEmail());
+                }
             }
         };
     }
 
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
+    }
 }
