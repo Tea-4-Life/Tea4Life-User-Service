@@ -15,6 +15,8 @@ import tea4life.user_service.dto.response.UserProfileResponse;
 public interface UserService {
     void processOnboarding(OnboardingRequest onboardingRequest);
 
+    void processOnboarding(Long userId, OnboardingRequest onboardingRequest);
+
     UserProfileResponse getUserProfile();
 
     void updateUserProfile(UpdateProfileRequest request);

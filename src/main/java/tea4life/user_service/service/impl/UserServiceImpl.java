@@ -71,7 +71,19 @@ public class UserServiceImpl implements UserService {
                 .findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng"));
 
+        applyOnboarding(user, onboardingRequest);
+    }
 
+    @Override
+    public void processOnboarding(Long userId, OnboardingRequest onboardingRequest) {
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng"));
+
+        applyOnboarding(user, onboardingRequest);
+    }
+
+    private void applyOnboarding(User user, OnboardingRequest onboardingRequest) {
         try {
             if (onboardingRequest.avatarKey() != null && !onboardingRequest.avatarKey().isBlank()) {
                 String destinationPath = "users/avatars/" + user.getId();
@@ -102,7 +114,6 @@ public class UserServiceImpl implements UserService {
             log.error("Onboarding thất bại cho user {}: {}", user.getId(), e.getMessage());
             throw e;
         }
-
     }
 
     @Override
