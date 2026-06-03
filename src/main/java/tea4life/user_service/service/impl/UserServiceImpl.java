@@ -45,6 +45,9 @@ import java.util.stream.Collectors;
 @Transactional
 public class UserServiceImpl implements UserService {
 
+    private static final String DEFAULT_CURRENT_REALM = "Tea4Life";
+    private static final String DEFAULT_VERIFY_CLIENT_ID = "admin-cli";
+
     UserRepository userRepository;
     StorageClient storageClient;
     Keycloak keycloak;
@@ -185,8 +188,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUserPassword(UpdatePasswordRequest request) {
         String keycloakId = UserContext.get().getKeycloakId();
+        String realm = resolveCurrentRealm();
 
-        verifyOldPassword(keycloakId, request.oldPassword());
+        verifyOldPassword(keycloakId, request.oldPassword(), realm);
 
         CredentialRepresentation credential = new CredentialRepresentation();
         credential.setType(CredentialRepresentation.PASSWORD);
@@ -194,7 +198,7 @@ public class UserServiceImpl implements UserService {
         credential.setTemporary(false);
 
         try {
-            keycloak.realm(currentRealm)
+            keycloak.realm(realm)
                     .users()
                     .get(keycloakId)
                     .resetPassword(credential);
@@ -239,8 +243,8 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    private void verifyOldPassword(String keycloakId, String oldPassword) {
-        String username = keycloak.realm(currentRealm)
+    private void verifyOldPassword(String keycloakId, String oldPassword, String realm) {
+        String username = keycloak.realm(realm)
                 .users()
                 .get(keycloakId)
                 .toRepresentation()
@@ -254,8 +258,8 @@ public class UserServiceImpl implements UserService {
         try (Keycloak tempKeycloak = KeycloakBuilder
                 .builder()
                 .serverUrl(serverUrl)
-                .realm(currentRealm)
-                .clientId(verifyClientId)
+                .realm(realm)
+                .clientId(resolveVerifyClientId())
                 .grantType(OAuth2Constants.PASSWORD)
                 .username(username)
                 .password(oldPassword)
@@ -267,12 +271,33 @@ public class UserServiceImpl implements UserService {
                     "Failed old password verification for keycloakId={}, username={}, client={}, serverUrl={}. Reason: {}",
                     keycloakId,
                     username,
-                    verifyClientId,
+                    resolveVerifyClientId(),
                     serverUrl,
                     e.getMessage()
             );
             throw new BusinessException("Mật khẩu cũ không chính xác!");
         }
+    }
+
+    private String resolveCurrentRealm() {
+        if (currentRealm != null && !currentRealm.isBlank()) {
+            return currentRealm.trim();
+        }
+
+        log.warn("keycloak.current-realm is blank. Falling back to {}", DEFAULT_CURRENT_REALM);
+        return DEFAULT_CURRENT_REALM;
+    }
+
+    private String resolveVerifyClientId() {
+        if (verifyClientId != null && !verifyClientId.isBlank()) {
+            return verifyClientId.trim();
+        }
+
+        if (clientId != null && !clientId.isBlank()) {
+            return clientId.trim();
+        }
+
+        return DEFAULT_VERIFY_CLIENT_ID;
     }
 
 }
