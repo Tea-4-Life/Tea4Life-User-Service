@@ -46,9 +46,12 @@ import java.util.stream.Collectors;
 @Transactional
 public class UserServiceImpl implements UserService {
 
+    private static final String DEFAULT_CURRENT_REALM = "Tea4Life";
+    private static final String DEFAULT_REALM_MASTER = "master";
+    private static final String DEFAULT_VERIFY_CLIENT_ID = "admin-cli";
+
     UserRepository userRepository;
     StorageClient storageClient;
-    Keycloak keycloak;
     RoleRepository roleRepository;
 
     KafkaTemplate<@NonNull String, @NonNull String> kafkaTemplate;
@@ -57,6 +60,18 @@ public class UserServiceImpl implements UserService {
     @NonFinal
     String serverUrl;
 
+    @Value("${keycloak.admin.user-name}")
+    @NonFinal
+    String adminUserName;
+
+    @Value("${keycloak.admin.password}")
+    @NonFinal
+    String adminPassword;
+
+    @Value("${keycloak.realm-master}")
+    @NonFinal
+    String realmMaster;
+
     @Value("${keycloak.current-realm}")
     @NonFinal
     String currentRealm;
@@ -64,6 +79,10 @@ public class UserServiceImpl implements UserService {
     @Value("${keycloak.client-id}")
     @NonFinal
     String clientId;
+
+    @Value("${keycloak.verify-client-id}")
+    @NonFinal
+    String verifyClientId;
 
     @Value("${spring.kafka.topic.storage-delete-file}")
     @NonFinal
@@ -182,22 +201,24 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUserPassword(UpdatePasswordRequest request) {
         String keycloakId = UserContext.get().getKeycloakId();
-        String email = UserContext.get().getEmail();
+        String realm = resolveCurrentRealm();
 
-        verifyOldPassword(email, request.oldPassword());
+        try (Keycloak adminKeycloak = createAdminKeycloak()) {
+            verifyOldPassword(adminKeycloak, keycloakId, request.oldPassword(), realm);
 
-        CredentialRepresentation credential = new CredentialRepresentation();
-        credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(request.newPassword());
-        credential.setTemporary(false);
+            CredentialRepresentation credential = new CredentialRepresentation();
+            credential.setType(CredentialRepresentation.PASSWORD);
+            credential.setValue(request.newPassword());
+            credential.setTemporary(false);
 
-        try {
-            keycloak.realm(currentRealm)
+            adminKeycloak.realm(realm)
                     .users()
                     .get(keycloakId)
                     .resetPassword(credential);
 
             log.info("Successfully updated password for user: {}", keycloakId);
+        } catch (BusinessException e) {
+            throw e;
         } catch (BadRequestException e) {
             log.error("Password policy violation for user {}: {}", keycloakId, e.getMessage());
             throw new BusinessException("Mật khẩu của bạn không đạt chuẩn!");
@@ -237,6 +258,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+
     @Override
     public void downgradeDriverRoleToMember(String keycloakId) {
         User user = userRepository
@@ -256,22 +278,99 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    private void verifyOldPassword(String email, String oldPassword) {
+
+    private void verifyOldPassword(Keycloak adminKeycloak, String keycloakId, String oldPassword, String realm) {
+        String username = adminKeycloak.realm(realm)
+                .users()
+                .get(keycloakId)
+                .toRepresentation()
+                .getUsername();
+
+        if (username == null || username.isBlank()) {
+            log.warn("Cannot verify old password because Keycloak username is blank for user: {}", keycloakId);
+            throw new BusinessException("Mật khẩu cũ không chính xác!");
+        }
+
         try (Keycloak tempKeycloak = KeycloakBuilder
                 .builder()
                 .serverUrl(serverUrl)
-                .realm(currentRealm)
-                .clientId(clientId)
+                .realm(realm)
+                .clientId(resolveVerifyClientId())
                 .grantType(OAuth2Constants.PASSWORD)
-                .username(email)
+                .username(username)
                 .password(oldPassword)
                 .build()) {
 
             tempKeycloak.tokenManager().getAccessToken();
         } catch (Exception e) {
-            log.warn("Failed password verification attempt for user: {}", email);
+            log.warn(
+                    "Failed old password verification for keycloakId={}, username={}, client={}, serverUrl={}. Reason: {}",
+                    keycloakId,
+                    username,
+                    resolveVerifyClientId(),
+                    serverUrl,
+                    e.getMessage()
+            );
             throw new BusinessException("Mật khẩu cũ không chính xác!");
         }
+    }
+
+    private Keycloak createAdminKeycloak() {
+        return KeycloakBuilder
+                .builder()
+                .serverUrl(requireConfig(serverUrl, "keycloak.server-url"))
+                .realm(resolveRealmMaster())
+                .clientId(resolveClientId())
+                .grantType(OAuth2Constants.PASSWORD)
+                .username(requireConfig(adminUserName, "keycloak.admin.user-name"))
+                .password(requireConfig(adminPassword, "keycloak.admin.password"))
+                .build();
+    }
+
+    private String resolveCurrentRealm() {
+        if (currentRealm != null && !currentRealm.isBlank()) {
+            return currentRealm.trim();
+        }
+
+        log.warn("keycloak.current-realm is blank. Falling back to {}", DEFAULT_CURRENT_REALM);
+        return DEFAULT_CURRENT_REALM;
+    }
+
+    private String resolveRealmMaster() {
+        if (realmMaster != null && !realmMaster.isBlank()) {
+            return realmMaster.trim();
+        }
+
+        log.warn("keycloak.realm-master is blank. Falling back to {}", DEFAULT_REALM_MASTER);
+        return DEFAULT_REALM_MASTER;
+    }
+
+    private String resolveClientId() {
+        if (clientId != null && !clientId.isBlank()) {
+            return clientId.trim();
+        }
+
+        return DEFAULT_VERIFY_CLIENT_ID;
+    }
+
+    private String resolveVerifyClientId() {
+        if (verifyClientId != null && !verifyClientId.isBlank()) {
+            return verifyClientId.trim();
+        }
+
+        if (clientId != null && !clientId.isBlank()) {
+            return clientId.trim();
+        }
+
+        return DEFAULT_VERIFY_CLIENT_ID;
+    }
+
+    private String requireConfig(String value, String propertyName) {
+        if (value != null && !value.isBlank()) {
+            return value.trim();
+        }
+
+        throw new IllegalStateException("Missing Keycloak config: " + propertyName);
     }
 
 }
