@@ -55,7 +55,7 @@ public class UserServiceController {
         return ApiResponse.<Void>builder().build();
     }
 
-    @PostMapping("/users/me/password")
+    @PostMapping("/me/password")
     public ApiResponse<@NonNull Void> updateUserPassword(
             @RequestBody @Valid UpdatePasswordRequest request
     ) {

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tea4life.user_service.advice.exception.BusinessException;
 import tea4life.user_service.client.StorageClient;
 import tea4life.user_service.context.UserContext;
 import tea4life.user_service.dto.base.ApiResponse;
@@ -198,7 +199,7 @@ public class UserServiceImpl implements UserService {
             log.info("Successfully updated password for user: {}", keycloakId);
         } catch (BadRequestException e) {
             log.error("Password policy violation for user {}: {}", keycloakId, e.getMessage());
-            throw new RuntimeException("Mật khẩu của bạn không đạt chuẩn!");
+            throw new BusinessException("Mật khẩu của bạn không đạt chuẩn!");
         } catch (Exception e) {
             log.error("Unexpected error during password update for user {}: {}", keycloakId, e.getMessage());
             throw new RuntimeException("Có lỗi đã xảy ra khi cố cập nhật mật khẩu.");
@@ -249,7 +250,7 @@ public class UserServiceImpl implements UserService {
             tempKeycloak.tokenManager().getAccessToken();
         } catch (Exception e) {
             log.warn("Failed password verification attempt for user: {}", email);
-            throw new RuntimeException("Mật khẩu cũ không chính xác!");
+            throw new BusinessException("Mật khẩu cũ không chính xác!");
         }
     }
 
