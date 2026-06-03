@@ -64,6 +64,10 @@ public class UserServiceImpl implements UserService {
     @NonFinal
     String clientId;
 
+    @Value("${keycloak.verify-client-id}")
+    @NonFinal
+    String verifyClientId;
+
     @Value("${spring.kafka.topic.storage-delete-file}")
     @NonFinal
     String storageDeleteFileTopic;
@@ -181,9 +185,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUserPassword(UpdatePasswordRequest request) {
         String keycloakId = UserContext.get().getKeycloakId();
-        String email = UserContext.get().getEmail();
 
-        verifyOldPassword(email, request.oldPassword());
+        verifyOldPassword(keycloakId, request.oldPassword());
 
         CredentialRepresentation credential = new CredentialRepresentation();
         credential.setType(CredentialRepresentation.PASSWORD);
@@ -236,20 +239,38 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    private void verifyOldPassword(String email, String oldPassword) {
+    private void verifyOldPassword(String keycloakId, String oldPassword) {
+        String username = keycloak.realm(currentRealm)
+                .users()
+                .get(keycloakId)
+                .toRepresentation()
+                .getUsername();
+
+        if (username == null || username.isBlank()) {
+            log.warn("Cannot verify old password because Keycloak username is blank for user: {}", keycloakId);
+            throw new BusinessException("Mật khẩu cũ không chính xác!");
+        }
+
         try (Keycloak tempKeycloak = KeycloakBuilder
                 .builder()
                 .serverUrl(serverUrl)
                 .realm(currentRealm)
-                .clientId(clientId)
+                .clientId(verifyClientId)
                 .grantType(OAuth2Constants.PASSWORD)
-                .username(email)
+                .username(username)
                 .password(oldPassword)
                 .build()) {
 
             tempKeycloak.tokenManager().getAccessToken();
         } catch (Exception e) {
-            log.warn("Failed password verification attempt for user: {}", email);
+            log.warn(
+                    "Failed old password verification for keycloakId={}, username={}, client={}, serverUrl={}. Reason: {}",
+                    keycloakId,
+                    username,
+                    verifyClientId,
+                    serverUrl,
+                    e.getMessage()
+            );
             throw new BusinessException("Mật khẩu cũ không chính xác!");
         }
     }
