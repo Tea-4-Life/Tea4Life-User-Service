@@ -46,11 +46,11 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private static final String DEFAULT_CURRENT_REALM = "Tea4Life";
+    private static final String DEFAULT_REALM_MASTER = "master";
     private static final String DEFAULT_VERIFY_CLIENT_ID = "admin-cli";
 
     UserRepository userRepository;
     StorageClient storageClient;
-    Keycloak keycloak;
     RoleRepository roleRepository;
 
     KafkaTemplate<@NonNull String, @NonNull String> kafkaTemplate;
@@ -58,6 +58,18 @@ public class UserServiceImpl implements UserService {
     @Value("${keycloak.server-url}")
     @NonFinal
     String serverUrl;
+
+    @Value("${keycloak.admin.user-name}")
+    @NonFinal
+    String adminUserName;
+
+    @Value("${keycloak.admin.password}")
+    @NonFinal
+    String adminPassword;
+
+    @Value("${keycloak.realm-master}")
+    @NonFinal
+    String realmMaster;
 
     @Value("${keycloak.current-realm}")
     @NonFinal
@@ -190,20 +202,22 @@ public class UserServiceImpl implements UserService {
         String keycloakId = UserContext.get().getKeycloakId();
         String realm = resolveCurrentRealm();
 
-        verifyOldPassword(keycloakId, request.oldPassword(), realm);
+        try (Keycloak adminKeycloak = createAdminKeycloak()) {
+            verifyOldPassword(adminKeycloak, keycloakId, request.oldPassword(), realm);
 
-        CredentialRepresentation credential = new CredentialRepresentation();
-        credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(request.newPassword());
-        credential.setTemporary(false);
+            CredentialRepresentation credential = new CredentialRepresentation();
+            credential.setType(CredentialRepresentation.PASSWORD);
+            credential.setValue(request.newPassword());
+            credential.setTemporary(false);
 
-        try {
-            keycloak.realm(realm)
+            adminKeycloak.realm(realm)
                     .users()
                     .get(keycloakId)
                     .resetPassword(credential);
 
             log.info("Successfully updated password for user: {}", keycloakId);
+        } catch (BusinessException e) {
+            throw e;
         } catch (BadRequestException e) {
             log.error("Password policy violation for user {}: {}", keycloakId, e.getMessage());
             throw new BusinessException("Mật khẩu của bạn không đạt chuẩn!");
@@ -243,8 +257,8 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    private void verifyOldPassword(String keycloakId, String oldPassword, String realm) {
-        String username = keycloak.realm(realm)
+    private void verifyOldPassword(Keycloak adminKeycloak, String keycloakId, String oldPassword, String realm) {
+        String username = adminKeycloak.realm(realm)
                 .users()
                 .get(keycloakId)
                 .toRepresentation()
@@ -279,6 +293,18 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    private Keycloak createAdminKeycloak() {
+        return KeycloakBuilder
+                .builder()
+                .serverUrl(requireConfig(serverUrl, "keycloak.server-url"))
+                .realm(resolveRealmMaster())
+                .clientId(resolveClientId())
+                .grantType(OAuth2Constants.PASSWORD)
+                .username(requireConfig(adminUserName, "keycloak.admin.user-name"))
+                .password(requireConfig(adminPassword, "keycloak.admin.password"))
+                .build();
+    }
+
     private String resolveCurrentRealm() {
         if (currentRealm != null && !currentRealm.isBlank()) {
             return currentRealm.trim();
@@ -286,6 +312,23 @@ public class UserServiceImpl implements UserService {
 
         log.warn("keycloak.current-realm is blank. Falling back to {}", DEFAULT_CURRENT_REALM);
         return DEFAULT_CURRENT_REALM;
+    }
+
+    private String resolveRealmMaster() {
+        if (realmMaster != null && !realmMaster.isBlank()) {
+            return realmMaster.trim();
+        }
+
+        log.warn("keycloak.realm-master is blank. Falling back to {}", DEFAULT_REALM_MASTER);
+        return DEFAULT_REALM_MASTER;
+    }
+
+    private String resolveClientId() {
+        if (clientId != null && !clientId.isBlank()) {
+            return clientId.trim();
+        }
+
+        return DEFAULT_VERIFY_CLIENT_ID;
     }
 
     private String resolveVerifyClientId() {
@@ -298,6 +341,14 @@ public class UserServiceImpl implements UserService {
         }
 
         return DEFAULT_VERIFY_CLIENT_ID;
+    }
+
+    private String requireConfig(String value, String propertyName) {
+        if (value != null && !value.isBlank()) {
+            return value.trim();
+        }
+
+        throw new IllegalStateException("Missing Keycloak config: " + propertyName);
     }
 
 }
