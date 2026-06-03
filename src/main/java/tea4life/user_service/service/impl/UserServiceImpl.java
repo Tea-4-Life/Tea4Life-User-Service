@@ -26,6 +26,7 @@ import tea4life.user_service.dto.response.UserProfileResponse;
 import tea4life.user_service.model.Permission;
 import tea4life.user_service.model.Role;
 import tea4life.user_service.model.User;
+import tea4life.user_service.model.constant.RoleName;
 import tea4life.user_service.repository.RoleRepository;
 import tea4life.user_service.repository.UserRepository;
 import tea4life.user_service.service.UserService;
@@ -233,6 +234,25 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy role: " + roleName));
 
         user.setRole(role);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void downgradeDriverRoleToMember(String keycloakId) {
+        User user = userRepository
+                .findByKeycloakId(keycloakId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng"));
+
+        Role currentRole = user.getRole();
+        if (currentRole == null || !RoleName.DRIVER.equalsIgnoreCase(currentRole.getName())) {
+            return;
+        }
+
+        Role memberRole = roleRepository
+                .findByName(RoleName.MEMBER)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy role: " + RoleName.MEMBER));
+
+        user.setRole(memberRole);
         userRepository.save(user);
     }
 

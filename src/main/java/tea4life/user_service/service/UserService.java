@@ -29,4 +29,6 @@ public interface UserService {
     UserPermissionsResponse getUserPermissions(String keycloakId);
 
     void assignRoleByName(String keycloakId, String roleName);
+
+    void downgradeDriverRoleToMember(String keycloakId);
 }
